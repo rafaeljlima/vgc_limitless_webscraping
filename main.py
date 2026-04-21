@@ -7,12 +7,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from database import Database
 from db_functions import *
 
-
 def scrape_all_tournaments():
     url = "https://play.limitlesstcg.com/tournaments/completed?game=VGC&format=M-A&platform=all&type=online&time=4weeks"
 
     options = Options()
-    options.add_argument("--start-maximized")
+    options.add_argument("--headless=new")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
 
     driver = webdriver.Chrome(options=options)
     wait = WebDriverWait(driver, 10)
@@ -20,7 +21,6 @@ def scrape_all_tournaments():
 
     try:
         driver.get(url)
-
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, "completed-tournaments")))
 
         with db.connect() as cursor:
