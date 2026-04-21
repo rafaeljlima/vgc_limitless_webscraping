@@ -53,6 +53,12 @@ def scrape_all_tournaments():
                 #Convertendo a data para formato sql
                 date_mysql = convert_date_to_mysql(date)
 
+                #Verificando se o torneio já existe no banco
+                existing_id = tournament_exists(cursor, name, date_mysql, players)
+
+                if existing_id:
+                    continue
+
                 #Inserindo os dados extraídos do torneio no banco
                 tournament_id = insert_tournament(cursor, name, date_mysql, players)
 
@@ -83,8 +89,11 @@ def scrape_all_tournaments():
 
                     team_id = insert_team(cursor, tournament_id, player_id, wins, losses, draws)
 
-                    #Clicando para seguir com a extração do time
-                    cols[-1].find_element(By.TAG_NAME, "a").click()
+                    #Clicando para seguir com a extração do time, mas desconsiderando jogadores que não publicaram time
+                    try:
+                        cols[-1].find_element(By.TAG_NAME, "a").click()
+                    except:
+                        continue
 
                     wait.until(EC.presence_of_element_located((By.CLASS_NAME, "teamlist-pokemon")))
 
@@ -103,7 +112,7 @@ def scrape_all_tournaments():
                         pt_id = insert_pokemon_team(cursor, team_id, pokemon_name, item, ability)
                         insert_moves(cursor, pt_id, moves)
 
-                    #Voltando para páginas anteriores, para reiniciar o processo e procurar por mais jogadore/times e depois por mais torneios
+                    #Voltando para páginas anteriores, para reiniciar o processo e procurar por mais jogadores/times e depois por mais torneios
                     driver.back()
                     wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
 

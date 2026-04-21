@@ -6,6 +6,17 @@ def insert_tournament(cursor, name, date, players):
     cursor.execute(query, (name, date, players))
     return cursor.lastrowid
 
+def tournament_exists(cursor, name, date, players):
+    query = """
+    SELECT id FROM Tournaments 
+    WHERE name = %s AND date = %s AND qtplayers = %s
+    """
+    cursor.execute(query, (name, date, players))
+    result = cursor.fetchone()
+
+    if result:
+        return result[0]
+    return None
 
 def insert_player(cursor, name):
     query = "INSERT INTO Players (name) VALUES (%s)"
