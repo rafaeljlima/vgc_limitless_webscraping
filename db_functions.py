@@ -60,3 +60,27 @@ def insert_moves(cursor, pokemon_team_id, moves):
         VALUES (%s, %s)
         """
         cursor.execute(query, (pokemon_team_id, move_id))
+
+def convert_date_to_mysql(date_str):
+    meses = {
+        "janeiro": "01",
+        "fevereiro": "02",
+        "março": "03",
+        "abril": "04",
+        "maio": "05",
+        "junho": "06",
+        "julho": "07",
+        "agosto": "08",
+        "setembro": "09",
+        "outubro": "10",
+        "novembro": "11",
+        "dezembro": "12"
+    }
+
+    partes = date_str.split()
+
+    dia = partes[0]
+    mes = meses[partes[2].lower()]
+    ano = partes[4]
+
+    return f"{ano}-{mes}-{dia.zfill(2)}"

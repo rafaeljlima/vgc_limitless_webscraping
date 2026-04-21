@@ -40,7 +40,7 @@ def scrape_all_tournaments():
                 name = cols[2].text
                 players = cols[5].text
 
-                date_mysql = "2026-04-20"
+                date_mysql = convert_date_to_mysql(date)
 
                 cols[2].find_element(By.TAG_NAME, "a").click()
 
