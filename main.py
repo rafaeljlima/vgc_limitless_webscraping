@@ -67,6 +67,14 @@ def scrape_all_tournaments():
 
                 wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
 
+                #Clicar em "Show all players" se existir
+                try:
+                    show_all = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "show-all")))
+                    show_all.click()
+                    wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
+                except:
+                    pass
+
                 #Carregamos a tabela dos jogadores do torneio
                 players_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
                 player_rows = players_table.find_elements(By.TAG_NAME, "tr")[1:]
@@ -83,7 +91,13 @@ def scrape_all_tournaments():
                     player_name = cols[1].text
 
                     record_text = cols[4].text
-                    wins, losses, draws = [x.strip() for x in record_text.split("-")]
+
+                    # Validar se o jogador tem recorde guardado no site
+                    parts = record_text.split("-")
+                    if len(parts) != 3:
+                        continue
+
+                    wins, losses, draws = [x.strip() for x in parts]
 
                     player_id = insert_player(cursor, player_name)
 
