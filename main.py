@@ -1,139 +1,260 @@
-#Importando bibliotecas e dependências do Selenium
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+#Importando bibliotecas para realizar requisições HTTP
+import requests
+from bs4 import BeautifulSoup
 
 #Importando funções de outros arquivos
 from database import Database
 from db_functions import *
 
+#URL base utilizada para montar links completos durante a navegação
+BASE_URL = "https://play.limitlesstcg.com"
+
+#Definindo cabeçalhos para simular um navegador comum
+HEADERS = {
+    "User-Agent": "Mozilla/5.0"
+}
+
+#Função auxiliar para realizar uma requisição e retornar o HTML tratado pelo BeautifulSoup
+def get_soup(url):
+    response = requests.get(
+        url,
+        headers=HEADERS,
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    return BeautifulSoup(response.text, "html.parser")
+
 #Função de scraping
 def scrape_all_tournaments():
+
     #Carregando a url desejada
-    url = "https://play.limitlesstcg.com/tournaments/completed?game=VGC&format=M-A&platform=all&type=online&time=4weeks"
+    url = (
+        "https://play.limitlesstcg.com/tournaments/completed"
+        "?game=VGC"
+        "&format=M-A"
+        "&platform=all"
+        "&type=online"
+        "&time=all"
+    )
 
-    #Definindo opções acessadas para o navegador, nesse caso headless-new e com gpu desativada para evitar bugs e diminuir processamento
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-
-    driver = webdriver.Chrome(options=options)
-    wait = WebDriverWait(driver, 10)
+    #Inicializando conexão com banco
     db = Database()
 
-    try:
-        driver.get(url)
+    #Utilizando a conexão do banco
+    with db.connect() as cursor:
 
-        #Utilizando sempre wait until para cada pagina carregar antes de começar o scraping
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "completed-tournaments")))
+        #Carregando a página principal de torneios através de uma requisição GET
+        tournaments_soup = get_soup(url)
 
-        #Utilizando a conexão do banco
-        with db.connect() as cursor:
+        #Definindo tabela e linhas de acordo com o HTML da página
+        tournaments_table = tournaments_soup.find(
+            "table",
+            class_="completed-tournaments"
+        )
 
-            #Definindo tabelas e linhas de acordo com o HTML da página
-            table = driver.find_element(By.CLASS_NAME, "completed-tournaments")
-            rows = table.find_elements(By.TAG_NAME, "tr")[1:]
+        if not tournaments_table:
+            raise Exception("Tabela de torneios não encontrada")
 
-            for t in range(len(rows)):
+        tournament_rows = tournaments_table.find_all("tr")[1:]
 
-                table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "completed-tournaments")))
-                rows = table.find_elements(By.TAG_NAME, "tr")[1:]
-                row = rows[t]
+        for row in tournament_rows:
 
-                cols = row.find_elements(By.TAG_NAME, "td")
+            cols = row.find_all("td")
 
-                #Pegando cada elemento do torneio
-                date = cols[1].text
-                name = cols[2].text
-                players = cols[5].text
+            if len(cols) < 6:
+                continue
 
-                #Convertendo a data para formato sql
-                date_mysql = convert_date_to_mysql(date)
+            #Pegando cada elemento do torneio
+            date = cols[1].get_text(strip=True)
+            name = cols[2].get_text(strip=True)
+            players = cols[5].get_text(strip=True)
 
-                #Verificando se o torneio já existe no banco
-                existing_id = tournament_exists(cursor, name, date_mysql, players)
+            #Convertendo a data para formato sql
+            date_mysql = convert_date_to_mysql(date)
 
-                if existing_id:
+            #Verificando se o torneio já existe no banco
+            existing_id = tournament_exists(
+                cursor,
+                name,
+                date_mysql,
+                players
+            )
+
+            if existing_id:
+                continue
+
+            #Inserindo os dados extraídos do torneio no banco
+            tournament_id = insert_tournament(
+                cursor,
+                name,
+                date_mysql,
+                players
+            )
+
+            #Obtendo o link da página do torneio
+            tournament_link = cols[2].find("a")
+
+            if not tournament_link:
+                continue
+
+            tournament_url = (
+                BASE_URL +
+                tournament_link["href"]
+            )
+
+            #Carregando a página do torneio através de uma nova requisição GET
+            try:
+                tournament_soup = get_soup(
+                    tournament_url
+                )
+            except Exception:
+                continue
+
+            #Carregamos a tabela dos jogadores do torneio
+            players_table = tournament_soup.find(
+                "table",
+                class_="striped"
+            )
+
+            if not players_table:
+                continue
+
+            player_rows = players_table.find_all("tr")[1:]
+
+            for prow in player_rows:
+
+                cols = prow.find_all("td")
+
+                if len(cols) < 5:
                     continue
 
-                #Inserindo os dados extraídos do torneio no banco
-                tournament_id = insert_tournament(cursor, name, date_mysql, players)
+                #Extraimos e inserimos as informações do jogador e resultados do time
+                player_name = cols[1].get_text(
+                    strip=True
+                )
 
-                #Clicando no torneio
-                cols[2].find_element(By.TAG_NAME, "a").click()
+                record_text = cols[4].get_text(
+                    strip=True
+                )
 
-                wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
+                #Validar se o jogador tem recorde guardado no site
+                parts = record_text.split("-")
 
-                #Clicar em "Show all players" se existir
+                if len(parts) != 3:
+                    continue
+
+                wins, losses, draws = [
+                    x.strip()
+                    for x in parts
+                ]
+
+                player_id = insert_player(
+                    cursor,
+                    player_name
+                )
+
+                team_id = insert_team(
+                    cursor,
+                    tournament_id,
+                    player_id,
+                    wins,
+                    losses,
+                    draws
+                )
+
+                #Obtendo o link do time do jogador, desconsiderando jogadores sem time publicado
+                team_anchor = cols[-1].find("a")
+
+                if not team_anchor:
+                    continue
+
+                team_url = (
+                    BASE_URL +
+                    team_anchor["href"]
+                )
+
+                #Carregando a página do time através de uma nova requisição GET
                 try:
-                    show_all = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "show-all")))
-                    show_all.click()
-                    wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
-                except:
-                    pass
+                    team_soup = get_soup(
+                        team_url
+                    )
+                except Exception:
+                    continue
 
-                #Carregamos a tabela dos jogadores do torneio
-                players_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
-                player_rows = players_table.find_elements(By.TAG_NAME, "tr")[1:]
+                team_div = team_soup.find(
+                    "div",
+                    class_="teamlist-pokemon"
+                )
 
-                for i in range(len(player_rows)):
-                    
-                    #Extraimos e inserimos as informações do jogador e resultados do time
-                    players_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
-                    player_rows = players_table.find_elements(By.TAG_NAME, "tr")[1:]
-                    prow = player_rows[i]
+                if not team_div:
+                    continue
 
-                    cols = prow.find_elements(By.TAG_NAME, "td")
+                pokemons = team_div.find_all(
+                    "div",
+                    class_="pkmn"
+                )
 
-                    player_name = cols[1].text
+                #Pegando os detalhes de cada pokémon do time
+                for p in pokemons:
 
-                    record_text = cols[4].text
+                    pokemon_name_element = p.select_one(
+                        ".name span"
+                    )
 
-                    # Validar se o jogador tem recorde guardado no site
-                    parts = record_text.split("-")
-                    if len(parts) != 3:
+                    item_element = p.find(
+                        "div",
+                        class_="item"
+                    )
+
+                    ability_element = p.find(
+                        "div",
+                        class_="ability"
+                    )
+
+                    if (
+                        not pokemon_name_element
+                        or not item_element
+                        or not ability_element
+                    ):
                         continue
 
-                    wins, losses, draws = [x.strip() for x in parts]
+                    pokemon_name = (
+                        pokemon_name_element.get_text(
+                            strip=True
+                        )
+                    )
 
-                    player_id = insert_player(cursor, player_name)
+                    item = item_element.get_text(
+                        strip=True
+                    )
 
-                    team_id = insert_team(cursor, tournament_id, player_id, wins, losses, draws)
+                    ability = ability_element.get_text(
+                        strip=True
+                    )
 
-                    #Clicando para seguir com a extração do time, mas desconsiderando jogadores que não publicaram time
-                    try:
-                        cols[-1].find_element(By.TAG_NAME, "a").click()
-                    except:
-                        continue
+                    moves = [
+                        move.get_text(strip=True)
+                        for move in p.select(
+                            ".attacks li"
+                        )
+                    ]
 
-                    wait.until(EC.presence_of_element_located((By.CLASS_NAME, "teamlist-pokemon")))
+                    pt_id = insert_pokemon_team(
+                        cursor,
+                        team_id,
+                        pokemon_name,
+                        item,
+                        ability
+                    )
 
-                    team_div = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "teamlist-pokemon")))
-                    pokemons = team_div.find_elements(By.CLASS_NAME, "pkmn")
+                    insert_moves(
+                        cursor,
+                        pt_id,
+                        moves
+                    )
 
-                    #Pegando os detalhes de cada pokémon do time
-                    for p in pokemons:
-                        pokemon_name = p.find_element(By.CSS_SELECTOR, ".name span").text
-                        item = p.find_element(By.CLASS_NAME, "item").text
-                        ability = p.find_element(By.CLASS_NAME, "ability").text
-
-                        moves_elements = p.find_elements(By.CSS_SELECTOR, ".attacks li")
-                        moves = [m.text for m in moves_elements]
-
-                        pt_id = insert_pokemon_team(cursor, team_id, pokemon_name, item, ability)
-                        insert_moves(cursor, pt_id, moves)
-
-                    #Voltando para páginas anteriores, para reiniciar o processo e procurar por mais jogadores/times e depois por mais torneios
-                    driver.back()
-                    wait.until(EC.presence_of_element_located((By.CLASS_NAME, "striped")))
-
-                driver.back()
-                wait.until(EC.presence_of_element_located((By.CLASS_NAME, "completed-tournaments")))
-    finally:
-        driver.quit()
 
 #Evitando execução adicional
 if __name__ == "__main__":
