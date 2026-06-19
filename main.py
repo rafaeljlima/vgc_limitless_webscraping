@@ -49,7 +49,7 @@ def scrape_all_tournaments():
         max_page = None
 
         while True:
-            
+
             paginated_url = url + f"&pg={page}"
 
             #Carregando a página principal de torneios através de uma requisição GET
@@ -85,6 +85,12 @@ def scrape_all_tournaments():
 
                 #Convertendo a data para formato sql
                 date_mysql = convert_date_to_mysql(date)
+
+                #Atualmente o limitless nao discerne M-B de M-A, então estou colocando um limite temporário na data até que isso seja tirado.
+                MAX_DATE = "2026-06-16"
+
+                if date_mysql > MAX_DATE:
+                    continue
 
                 #Verificando se o torneio já existe no banco
                 existing_id = tournament_exists(
