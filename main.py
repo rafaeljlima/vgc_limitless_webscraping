@@ -87,6 +87,9 @@ def scrape_all_tournaments():
                 date_mysql = convert_date_to_mysql(date)
 
                 #Atualmente o limitless nao discerne M-B de M-A, então estou colocando um limite temporário na data até que isso seja tirado.
+                
+                #Atualização: O limitless adicionou um filtro para regulamento M-B, mas os torneios que ja foram registrados como M-A se mantiveram assim, 
+                # então o filtro de data se mantém
                 MAX_DATE = "2026-06-16"
 
                 if date_mysql > MAX_DATE:
