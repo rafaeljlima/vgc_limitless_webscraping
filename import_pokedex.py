@@ -113,21 +113,29 @@ def import_pokedex():
                     if move_name not in move_cache:
 
                         move_data = get_move_data(move_url)
-                        damage_class = move_data["damage_class"]["name"]
 
-                        move_cache[move_name] = damage_class
+                        damage_class = move_data["damage_class"]["name"]
+                        move_type = move_data["type"]["name"]
+                        accuracy = move_data["accuracy"]
+                        power = move_data["power"]
 
                         cursor.execute(
                             """
                             INSERT IGNORE INTO Moves_data (
                                 name,
-                                damage_class
+                                damage_class,
+                                type,
+                                accuracy,
+                                power
                             )
-                            VALUES (%s, %s)
+                            VALUES (%s, %s, %s, %s, %s)
                             """,
                             (
                                 move_name,
-                                damage_class
+                                damage_class,
+                                move_type,
+                                accuracy,
+                                power
                             )
                         )
 
