@@ -22,53 +22,33 @@ def get_all_pokemon():
 
 def get_pokemon_data(url):
 
-    while True:
+    try:
+        response = requests.get(
+            url,
+            headers=HEADERS,
+            timeout=30
+        )
 
-        try:
+        response.raise_for_status()
+        return response.json()
 
-            response = requests.get(
-                url,
-                headers=HEADERS,
-                timeout=30
-            )
-
-            response.raise_for_status()
-
-            return response.json()
-
-        except requests.RequestException as e:
-
-            print(
-                f"Erro ao buscar Pokémon ({e}). "
-                "Tentando novamente em 5 segundos..."
-            )
-
-            time.sleep(5)
+    except requests.RequestException as e:
+        raise e
 
 def get_move_data(url):
 
-    while True:
+    try:
+        response = requests.get(
+            url,
+            headers=HEADERS,
+            timeout=30
+        )
 
-        try:
+        response.raise_for_status()
+        return response.json()
 
-            response = requests.get(
-                url,
-                headers=HEADERS,
-                timeout=30
-            )
-
-            response.raise_for_status()
-
-            return response.json()
-
-        except requests.RequestException as e:
-
-            print(
-                f"Erro ao buscar move ({e}). "
-                "Tentando novamente em 5 segundos..."
-            )
-
-            time.sleep(5)
+    except requests.RequestException as e:
+        raise e
 
 def import_pokedex():
 
@@ -82,6 +62,8 @@ def import_pokedex():
     pokemon_counter = 0
     move_counter = 0
     error_occurred = False
+
+    failed_pokemons = []
 
     with db.connect() as cursor:
 
@@ -173,32 +155,26 @@ def import_pokedex():
                         move_counter += 1
 
                         if move_counter % 100 == 0:
-                            print(
-                                f"{move_counter} moves únicos registrados..."
-                            )
+                            print(f"{move_counter} moves únicos registrados...")
 
             except Exception as e:
                 error_occurred = True
+                failed_pokemons.append(pokemon["name"])
                 print(f"Erro em {pokemon['name']}: {e}")
 
     print("\n=== PROCESSO FINALIZADO ===")
 
-    print(
-        f"Total de Pokémon processados: {pokemon_counter}"
-    )
+    print(f"Total de Pokémon processados: {pokemon_counter}")
+    print(f"Total de movimentos únicos registrados: {move_counter}")
+    print(f"Moves armazenados no cache: {len(move_cache)}")
 
-    print(
-        f"Total de movimentos únicos registrados: {move_counter}"
-    )
-
-    print(
-        f"Moves armazenados no cache: {len(move_cache)}"
-    )
+    print(f"\nPokémon que falharam ({len(failed_pokemons)}):")
+    print(failed_pokemons)
 
     if error_occurred:
-        print("Finalizado com erros.")
+        print("\nFinalizado com erros.")
     else:
-        print("Finalizado sem erros.")
+        print("\nFinalizado sem erros.")
 
 
 if __name__ == "__main__":
