@@ -50,7 +50,7 @@ def scrape_all_tournaments():
 
         while True:
 
-            paginated_url = url + f"&pg={page}"
+            paginated_url = url + f"&page={page}"
 
             #Carregando a página principal de torneios através de uma requisição GET
             tournaments_soup = get_soup(paginated_url)
@@ -71,6 +71,10 @@ def scrape_all_tournaments():
                 if pagination:
                     max_page = int(pagination["data-max"])
 
+            print(f"\n{'='*80}")
+            print(f"PROCESSANDO PÁGINA {page}")
+            print(f"{'='*80}")
+
             for row in tournament_rows:
 
                 cols = row.find_all("td")
@@ -78,24 +82,27 @@ def scrape_all_tournaments():
                 if len(cols) < 6:
                     continue
 
-                #Pegando cada elemento do torneio
-                date = cols[1].get_text(strip=True)
+                date_iso = row.get("data-date")
+
+                if not date_iso:
+                    continue
+
+                date_mysql = date_iso[:10]
+
                 name = cols[2].get_text(strip=True)
                 players = cols[5].get_text(strip=True)
 
-                #Convertendo a data para formato sql
-                date_mysql = convert_date_to_mysql(date)
+                print("\n" + "-"*80)
+                print(f"TORNEIO: {name}")
+                print(f"DATA: {date_mysql}")
+                print(f"PLAYERS SITE: {players}")
 
-                #Atualmente o limitless nao discerne M-B de M-A, então estou colocando um limite temporário na data até que isso seja tirado.
-                
-                #Atualização: O limitless adicionou um filtro para regulamento M-B, mas os torneios que ja foram registrados como M-A se mantiveram assim, 
-                # então o filtro de data se mantém
                 MAX_DATE = "2026-06-16"
 
                 if date_mysql > MAX_DATE:
+                    print("IGNORADO POR DATA")
                     continue
 
-                #Verificando se o torneio já existe no banco
                 existing_id = tournament_exists(
                     cursor,
                     name,
@@ -104,9 +111,9 @@ def scrape_all_tournaments():
                 )
 
                 if existing_id:
+                    print("TORNEIO JÁ EXISTE")
                     continue
 
-                #Inserindo os dados extraídos do torneio no banco
                 tournament_id = insert_tournament(
                     cursor,
                     name,
@@ -114,10 +121,12 @@ def scrape_all_tournaments():
                     players
                 )
 
-                #Obtendo o link da página do torneio
+                print(f"TORNEIO INSERIDO -> ID {tournament_id}")
+
                 tournament_link = cols[2].find("a")
 
                 if not tournament_link:
+                    print("SEM LINK DE TORNEIO")
                     continue
 
                 tournament_url = (
@@ -125,24 +134,34 @@ def scrape_all_tournaments():
                     tournament_link["href"]
                 )
 
-                #Carregando a página do torneio através de uma nova requisição GET
+                print(f"URL TORNEIO: {tournament_url}")
+
                 try:
                     tournament_soup = get_soup(
                         tournament_url
                     )
-                except Exception:
+                except Exception as e:
+                    print(f"ERRO AO ABRIR TORNEIO: {e}")
                     continue
 
-                #Carregamos a tabela dos jogadores do torneio
                 players_table = tournament_soup.find(
                     "table",
                     class_="striped"
                 )
 
                 if not players_table:
+                    print("TABELA DE PLAYERS NÃO ENCONTRADA")
                     continue
 
                 player_rows = players_table.find_all("tr")[1:]
+
+                print(
+                    f"JOGADORES ENCONTRADOS NA TABELA: {len(player_rows)}"
+                )
+
+                player_counter = 0
+                team_counter = 0
+                pokemon_counter = 0
 
                 for prow in player_rows:
 
@@ -151,7 +170,6 @@ def scrape_all_tournaments():
                     if len(cols) < 5:
                         continue
 
-                    #Extraimos e inserimos as informações do jogador e resultados do time
                     player_name = cols[1].get_text(
                         strip=True
                     )
@@ -160,10 +178,12 @@ def scrape_all_tournaments():
                         strip=True
                     )
 
-                    #Validar se o jogador tem recorde guardado no site
                     parts = record_text.split("-")
 
                     if len(parts) != 3:
+                        print(
+                            f"PLAYER IGNORADO SEM RECORD: {player_name}"
+                        )
                         continue
 
                     wins, losses, draws = [
@@ -171,10 +191,21 @@ def scrape_all_tournaments():
                         for x in parts
                     ]
 
+                    player_counter += 1
+
+                    print()
+                    print(f"PLAYER #{player_counter}")
+                    print(f"NOME: {player_name}")
+                    print(
+                        f"RECORD: {wins}-{losses}-{draws}"
+                    )
+
                     player_id = insert_player(
                         cursor,
                         player_name
                     )
+
+                    print(f"PLAYER ID: {player_id}")
 
                     team_id = insert_team(
                         cursor,
@@ -185,10 +216,14 @@ def scrape_all_tournaments():
                         draws
                     )
 
-                    #Obtendo o link do time do jogador, desconsiderando jogadores sem time publicado
+                    team_counter += 1
+
+                    print(f"TEAM ID: {team_id}")
+
                     team_anchor = cols[-1].find("a")
 
                     if not team_anchor:
+                        print("SEM TEAM PUBLICADO")
                         continue
 
                     team_url = (
@@ -196,12 +231,16 @@ def scrape_all_tournaments():
                         team_anchor["href"]
                     )
 
-                    #Carregando a página do time através de uma nova requisição GET
+                    print(f"TEAM URL: {team_url}")
+
                     try:
                         team_soup = get_soup(
                             team_url
                         )
-                    except Exception:
+                    except Exception as e:
+                        print(
+                            f"ERRO AO ABRIR TEAM: {e}"
+                        )
                         continue
 
                     team_div = team_soup.find(
@@ -210,6 +249,7 @@ def scrape_all_tournaments():
                     )
 
                     if not team_div:
+                        print("TEAMLIST NÃO ENCONTRADA")
                         continue
 
                     pokemons = team_div.find_all(
@@ -217,8 +257,11 @@ def scrape_all_tournaments():
                         class_="pkmn"
                     )
 
-                    #Pegando os detalhes de cada pokémon do time
-                    for p in pokemons:
+                    print(
+                        f"POKÉMONS ENCONTRADOS NO TIME: {len(pokemons)}"
+                    )
+
+                    for index, p in enumerate(pokemons, start=1):
 
                         pokemon_name_element = p.select_one(
                             ".name span"
@@ -239,16 +282,43 @@ def scrape_all_tournaments():
                             or not item_element
                             or not ability_element
                         ):
+                            print(
+                                f"POKÉMON #{index} INVÁLIDO"
+                            )
                             continue
 
-                        pokemon_name = pokemon_name_element.get_text(strip=True)
-                        item = item_element.get_text(strip=True)
-                        ability = ability_element.get_text(strip=True)
+                        pokemon_name = pokemon_name_element.get_text(
+                            strip=True
+                        )
+
+                        item = item_element.get_text(
+                            strip=True
+                        )
+
+                        ability = ability_element.get_text(
+                            strip=True
+                        )
 
                         moves = [
                             move.get_text(strip=True)
                             for move in p.select(".attacks li")
                         ]
+
+                        print(
+                            f"POKÉMON #{index}: {pokemon_name}"
+                        )
+
+                        print(
+                            f"ITEM: {item}"
+                        )
+
+                        print(
+                            f"ABILITY: {ability}"
+                        )
+
+                        print(
+                            f"MOVES ({len(moves)}): {moves}"
+                        )
 
                         pt_id = insert_pokemon_team(
                             cursor,
@@ -258,13 +328,34 @@ def scrape_all_tournaments():
                             ability
                         )
 
-                        insert_moves(cursor, pt_id, moves)
+                        print(
+                            f"POKEMON_TEAM ID: {pt_id}"
+                        )
+
+                        insert_moves(
+                            cursor,
+                            pt_id,
+                            moves
+                        )
+
+                        pokemon_counter += 1
+
+                print("\nRESUMO DO TORNEIO")
+                print(
+                    f"PLAYERS PROCESSADOS: {player_counter}"
+                )
+                print(
+                    f"TEAMS CRIADOS: {team_counter}"
+                )
+                print(
+                    f"POKÉMONS INSERIDOS: {pokemon_counter}"
+                )
+                print("-"*80)
 
             if max_page and page >= max_page:
                 break
 
             page += 1
-
 
 #Evitando execução adicional
 if __name__ == "__main__":
