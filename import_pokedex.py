@@ -250,3 +250,7 @@ Pokémon que falharam (4):
 
 Finalizado com erros.
 """
+
+#Como os únicos erros foram derivados de deficiência da própia API, e nenhum dos 3 primeiros pokémons são utilizados na regulação atual em teste, decidi ignorar.
+#Ao caso de meowstic female mega, mesmo sendo legal na atual regulação, o uso dela é tão baixo, e a API ainda não tem os dados referentes ao pokémon...
+#  que também deixei de lado, não acreditando que pode afetar o desenvolvimento de uma resposta para a questão problema de nenhuma forma pelo quão pouco utilizado é.
