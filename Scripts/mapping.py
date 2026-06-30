@@ -2,16 +2,21 @@ from thefuzz import fuzz
 from Imports.database import Database
 
 def fetch_all_scraper_pokemons(cursor):
-    """Busca ID e nome_clean de todos os pokémons do Scraper."""
     query = "SELECT id, name, name_clean FROM Pokemons"
     cursor.execute(query)
-    return cursor.fetchall() # Retorna [(id, name, name_clean), ...]
+    return cursor.fetchall()
 
 def fetch_all_api_pokemons(cursor):
-    """Busca ID e nome_clean de todos os pokémons da API."""
     query = "SELECT id, name, name_clean FROM Pokemon_data"
     cursor.execute(query)
-    return cursor.fetchall() # Retorna [(id, name, name_clean), ...]
+    return cursor.fetchall()
+
+def salvar_mapeamento(cursor, dados_mapeamento):
+    query = """
+        REPLACE INTO Pokemon_mapping (pokemon_scraper_id, pokemon_api_id, score)
+        VALUES (%s, %s, %s)
+    """
+    cursor.executemany(query, dados_mapeamento)
 
 EXCECOES_MAPEAMENTO = {
     "maushold": "maushold family of four",
@@ -24,7 +29,7 @@ EXCECOES_MAPEAMENTO = {
     "tatsugiri": "tatsugiri curly"
 }
 
-def gerar_preview_casamento():
+def executar_mapeamento():
     db = Database()
     
     with db.connect() as cursor:
@@ -36,28 +41,28 @@ def gerar_preview_casamento():
         pokemons_scraper = fetch_all_scraper_pokemons(cursor)
         pokemons_api = fetch_all_api_pokemons(cursor)
         
-        resultados = []
+        dados_para_salvar = []
+        preview_relatorio = []
         
-        print("Processando similaridades (Com Dicionário de Exceções)...")
+        print("Processando mapeamento estratégico...")
         for scr_id, scr_orig, scr_clean in pokemons_scraper:
             
-            # --- REGRA 1: VERIFICA SE ESTÁ NAS EXCEÇÕES MANUAIS ---
             if scr_clean in EXCECOES_MAPEAMENTO:
                 nome_alvo_api = EXCECOES_MAPEAMENTO[scr_clean]
                 
-                # Busca os dados reais desse alvo na lista da API para manter o preview correto
                 for api_id, api_orig, api_clean in pokemons_api:
                     if api_clean == nome_alvo_api:
-                        resultados.append({
+                        dados_para_salvar.append((scr_id, api_id, 100))
+                        preview_relatorio.append({
                             'scraper_orig': scr_orig,
                             'api_orig': api_orig,
-                            'score': 100  # Forçamos o score 100 fixo para as nossas exceções
+                            'score': 100
                         })
                         break
-                continue  # Vai para o próximo Pokémon do scraper, pulando o Fuzzy Match!
+                continue
 
-            # --- REGRA 2: SE NÃO FOR EXCEÇÃO, RODA O FUZZY MATCHING NORMAL ---
             melhor_score = -1
+            melhor_match_id = None
             melhor_match_api_orig = None
             
             for api_id, api_orig, api_clean in pokemons_api:
@@ -65,27 +70,30 @@ def gerar_preview_casamento():
                 
                 if score > melhor_score:
                     melhor_score = score
+                    melhor_match_id = api_id
                     melhor_match_api_orig = api_orig
             
-            resultados.append({
-                'scraper_orig': scr_orig,
-                'api_orig': melhor_match_api_orig,
-                'score': melhor_score
-            })
+            if melhor_match_id is not None:
+                dados_para_salvar.append((scr_id, melhor_match_id, melhor_score))
+                preview_relatorio.append({
+                    'scraper_orig': scr_orig,
+                    'api_orig': melhor_match_api_orig,
+                    'score': melhor_score
+                })
         
-        # Ordena a lista de resultados pelo SCORE de forma CRESCENTE (menores primeiro)
-        resultados_ordenados = sorted(resultados, key=lambda x: x['score'])
+        print(f"Salvando {len(dados_para_salvar)} registros na tabela Pokemon_mapping...")
+        salvar_mapeamento(cursor, dados_para_salvar)
+        print("Sucesso: Mapeamento persistido com êxito!")
+
+        resultados_ordenados = sorted(preview_relatorio, key=lambda x: x['score'])
         
-        # Exibe os resultados formatados no terminal
         print("\n" + "="*80)
         print(f"{'NOME SCRAPER':<28} | {'NOME API':<28} | {'SCORE':<5}")
         print("="*80)
-        
         for r in resultados_ordenados:
             print(f"{r['scraper_orig']:<28} | {r['api_orig']:<28} | {r['score']:<5}")
-            
         print("="*80)
-        print(f"Total de Pokémons analisados: {len(resultados)}")
+        print(f"Total de Pokémons mapeados e salvos: {len(dados_para_salvar)}")
 
 if __name__ == "__main__":
-    gerar_preview_casamento()
+    executar_mapeamento()
