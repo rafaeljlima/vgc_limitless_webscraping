@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 from contextlib import contextmanager
-from config import DB_CONFIG
+from PkmScrapper.Imports.config import DB_CONFIG
 
 class Database:
     def __init__(self):

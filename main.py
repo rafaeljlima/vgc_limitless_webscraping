@@ -3,8 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 
 #Importando funções de outros arquivos
-from database import Database
-from db_functions import *
+from PkmScrapper.Imports.database import Database
+from PkmScrapper.Imports.db_functions import *
 
 #URL base utilizada para montar links completos durante a navegação
 BASE_URL = "https://play.limitlesstcg.com"
