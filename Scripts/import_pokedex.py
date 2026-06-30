@@ -3,7 +3,7 @@ import requests
 import time
 
 #Importando conexão com banco de dados
-from PkmScrapper.Imports.database import Database
+from Imports.database import Database
 
 #URL base da PokeAPI para buscar dados de Pokémon
 BASE_URL = "https://pokeapi.co/api/v2/pokemon"

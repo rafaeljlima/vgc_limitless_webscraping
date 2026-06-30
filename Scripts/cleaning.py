@@ -1,5 +1,5 @@
 import re
-from PkmScrapper.Imports.database import Database 
+from Imports.database import Database 
 
 def sanitizar_nome(nome):
     if not nome:

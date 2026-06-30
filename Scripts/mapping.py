@@ -1,5 +1,5 @@
 from thefuzz import fuzz
-from PkmScrapper.Imports.database import Database
+from Imports.database import Database
 
 def fetch_all_scraper_pokemons(cursor):
     """Busca ID e nome_clean de todos os pokémons do Scraper."""
