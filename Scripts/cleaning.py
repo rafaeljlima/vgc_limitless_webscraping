@@ -8,10 +8,15 @@ def sanitizar_nome(nome):
     # 1. Transforma em minúsculo
     nome_limpo = nome.lower()
     
-    # 2. Substitui traços (-), sublinhados (_) e pontos por espaços simples
+    # 2. Intercepta os símbolos de gênero e substitui por texto puro
+    # (Adicionamos um espaço antes para garantir que não grude no nome)
+    nome_limpo = nome_limpo.replace("♀", " female")
+    nome_limpo = nome_limpo.replace("♂", " male")
+    
+    # 3. Substitui traços (-), sublinhados (_) e pontos por espaços simples
     nome_limpo = re.sub(r'[-_\.]', ' ', nome_limpo)
     
-    # 3. Remove múltiplos espaços extras e espaços nas pontas
+    # 4. Remove múltiplos espaços extras e espaços nas pontas
     nome_limpo = " ".join(nome_limpo.split())
     
     return nome_limpo
