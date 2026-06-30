@@ -13,6 +13,17 @@ def fetch_all_api_pokemons(cursor):
     cursor.execute(query)
     return cursor.fetchall() # Retorna [(id, name, name_clean), ...]
 
+EXCECOES_MAPEAMENTO = {
+    "maushold": "maushold family of four",
+    "paldean tauros": "tauros paldea combat breed",
+    "aegislash": "aegislash shield",
+    "aegislash blade forme": "aegislash shield",
+    "palafin": "palafin zero",
+    "morpeko": "morpeko full belly",
+    "mimikyu": "mimikyu disguised",
+    "tatsugiri": "tatsugiri curly"
+}
+
 def gerar_preview_casamento():
     db = Database()
     
@@ -27,25 +38,35 @@ def gerar_preview_casamento():
         
         resultados = []
         
-        print("Processando similaridades (Fuzzy Matching)...")
-        # Para cada pokémon do seu scraper...
+        print("Processando similaridades (Com Dicionário de Exceções)...")
         for scr_id, scr_orig, scr_clean in pokemons_scraper:
+            
+            # --- REGRA 1: VERIFICA SE ESTÁ NAS EXCEÇÕES MANUAIS ---
+            if scr_clean in EXCECOES_MAPEAMENTO:
+                nome_alvo_api = EXCECOES_MAPEAMENTO[scr_clean]
+                
+                # Busca os dados reais desse alvo na lista da API para manter o preview correto
+                for api_id, api_orig, api_clean in pokemons_api:
+                    if api_clean == nome_alvo_api:
+                        resultados.append({
+                            'scraper_orig': scr_orig,
+                            'api_orig': api_orig,
+                            'score': 100  # Forçamos o score 100 fixo para as nossas exceções
+                        })
+                        break
+                continue  # Vai para o próximo Pokémon do scraper, pulando o Fuzzy Match!
+
+            # --- REGRA 2: SE NÃO FOR EXCEÇÃO, RODA O FUZZY MATCHING NORMAL ---
             melhor_score = -1
             melhor_match_api_orig = None
-            melhor_match_api_clean = None
             
-            # Compara contra TODOS os pokémons que vieram da API
             for api_id, api_orig, api_clean in pokemons_api:
-                # Usando o token_sort_ratio como o Ronaldinho sugeriu
                 score = fuzz.token_sort_ratio(scr_clean, api_clean)
                 
-                # Se achou um score maior, atualiza o melhor match para este pokémon
                 if score > melhor_score:
                     melhor_score = score
                     melhor_match_api_orig = api_orig
-                    melhor_match_api_clean = api_clean
             
-            # Guarda o resultado encontrado para este pokémon do scraper
             resultados.append({
                 'scraper_orig': scr_orig,
                 'api_orig': melhor_match_api_orig,
@@ -53,7 +74,6 @@ def gerar_preview_casamento():
             })
         
         # Ordena a lista de resultados pelo SCORE de forma CRESCENTE (menores primeiro)
-        # Assim você vê logo no topo da tabela onde o algoritmo começou a errar ou fraquejar
         resultados_ordenados = sorted(resultados, key=lambda x: x['score'])
         
         # Exibe os resultados formatados no terminal
