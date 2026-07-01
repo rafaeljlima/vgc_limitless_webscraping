@@ -1,10 +1,13 @@
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
 #Importando bibliotecas para realizar requisições HTTP
 import requests
 from bs4 import BeautifulSoup
 
 #Importando funções de outros arquivos
-from Imports.database import Database
-from Imports.db_functions import *
+from imports.database import Database
+from imports.db_functions import *
 
 #URL base utilizada para montar links completos durante a navegação
 BASE_URL = "https://play.limitlesstcg.com"

@@ -1,5 +1,8 @@
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
 import re
-from Imports.database import Database 
+from imports.database import Database 
 
 def sanitizar_nome(nome):
     if not nome:

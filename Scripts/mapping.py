@@ -1,5 +1,8 @@
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
 from thefuzz import fuzz
-from Imports.database import Database
+from imports.database import Database
 
 def fetch_all_scraper_pokemons(cursor):
     query = "SELECT id, name, name_clean FROM Pokemons"

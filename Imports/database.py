@@ -1,7 +1,10 @@
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
 import mysql.connector
 from mysql.connector import Error
 from contextlib import contextmanager
-from Imports.config import DB_CONFIG
+from imports.config import DB_CONFIG
 
 class Database:
     def __init__(self):

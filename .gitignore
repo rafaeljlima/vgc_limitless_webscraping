@@ -1,4 +1,4 @@
 config.py
-*.sql
-*.csv
+/sql
 *.ipynb
+/notas

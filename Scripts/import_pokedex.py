@@ -1,9 +1,12 @@
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
 #Importando bibliotecas para realizar requisições HTTP
 import requests
 import time
 
 #Importando conexão com banco de dados
-from Imports.database import Database
+from imports.database import Database
 
 #URL base da PokeAPI para buscar dados de Pokémon
 BASE_URL = "https://pokeapi.co/api/v2/pokemon"
