@@ -98,6 +98,7 @@ CREATE TABLE Pokemon_moves (
     FOREIGN KEY (idmove) REFERENCES Moves(id)
 );
 
+-- Em nova utilização do script, incluir em CREATE
 ALTER TABLE Pokemon_data ADD COLUMN name_clean VARCHAR(100);
 ALTER TABLE Pokemons ADD COLUMN name_clean VARCHAR(100);
 
@@ -110,9 +111,11 @@ CREATE TABLE Pokemon_mapping (
     FOREIGN KEY (pokemon_api_id) REFERENCES Pokemon_data(id)
 );
 
+-- Adicionar inclusão do formato no script caso expansão para outros formatos for usada
 ALTER TABLE Tournaments ADD COLUMN format VARCHAR(100);
 UPDATE Tournaments SET format = 'M-A';
 
+-- Em nova utilização do script, incluir em CREATE
 ALTER TABLE Moves_data ADD COLUMN name_clean VARCHAR(100);
 ALTER TABLE Moves ADD COLUMN name_clean VARCHAR(100);
 
