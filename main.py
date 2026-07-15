@@ -1,23 +1,18 @@
 import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 
-#Importando bibliotecas para realizar requisições HTTP
 import requests
 from bs4 import BeautifulSoup
 
-#Importando funções de outros arquivos
 from imports.database import Database
 from imports.db_functions import *
 
-#URL base utilizada para montar links completos durante a navegação
 BASE_URL = "https://play.limitlesstcg.com"
 
-#Definindo cabeçalhos para simular um navegador comum
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
 }
 
-#Função GET de requisição para retornar o HTML tratado pelo BeautifulSoup
 def get_soup(url):
     response = requests.get(
         url,
@@ -29,10 +24,8 @@ def get_soup(url):
 
     return BeautifulSoup(response.text, "html.parser")
 
-#Função de scraping
 def scrape_all_tournaments():
 
-    #Carregando a url desejada
     url = (
         "https://play.limitlesstcg.com/tournaments/completed"
         "?game=VGC"
@@ -42,25 +35,19 @@ def scrape_all_tournaments():
         "&time=all"
     )
 
-    #Inicializando conexão com banco
     db = Database()
 
-    #Utilizando a conexão do banco
     with db.connect() as cursor:
 
-        #Definindo páginação inicial e limite
         page = 1
         max_page = None
 
         while True:
 
-            #incluindo paginação atual na url da página
             paginated_url = url + f"&page={page}"
 
-            #Carregando a página principal de torneios através de uma requisição GET
             tournaments_soup = get_soup(paginated_url)
 
-            #Definindo tabela e linhas de acordo com o HTML da página
             tournaments_table = tournaments_soup.find(
                 "table",
                 class_="completed-tournaments"
@@ -76,7 +63,6 @@ def scrape_all_tournaments():
                 if pagination:
                     max_page = int(pagination["data-max"])
 
-            #Prints opcionais de retorno para acompanhar progresso do scraping em cada página
             print(f"\n{'='*80}")
             print(f"PROCESSANDO PÁGINA {page}")
             print(f"{'='*80}")
@@ -88,34 +74,27 @@ def scrape_all_tournaments():
                 if len(cols) < 6:
                     continue
 
-                #Resgatando o retorno html de data do torneio na váriavel
                 date_iso = row.get("data-date")
 
                 if not date_iso:
                     continue
 
-                #Ignorando horas e pegando somente os caracteres de data
                 date_mysql = date_iso[:10]
 
-                #Resgatando as outras váriaveis
                 name = cols[2].get_text(strip=True)
                 players = cols[5].get_text(strip=True)
 
-                #Prints opcionais de retorno para acompanhar progresso do scraping em cada torneio
                 print("\n" + "-"*80)
                 print(f"TORNEIO: {name}")
                 print(f"DATA: {date_mysql}")
                 print(f"PLAYERS SITE: {players}")
 
-                #Definindo data máxima de torneio para essa pesquisa em específico, data máxima da regulação M-A
                 MAX_DATE = "2026-06-16"
 
                 if date_mysql > MAX_DATE:
                     print("IGNORADO POR DATA")
                     continue
 
-                #Apartir daqui, resgatando cada valor um a um, sempre tratando erros caso haja ausência de algum valor considerado crucial ...
-                #  e resgatando valores para prints de acompanhamento ao longo dos loops
                 existing_id = tournament_exists(
                     cursor,
                     name,
@@ -370,6 +349,5 @@ def scrape_all_tournaments():
 
             page += 1
 
-#Evitando execução adicional
 if __name__ == "__main__":
     scrape_all_tournaments()
