@@ -6,6 +6,7 @@
 
 Nas competições de Pokémon VGC (Video Game Championship), a montagem de times costuma ser guiada por intuição, experiência pessoal ou pela simples cópia de composições populares. 
 
+> [!IMPORTANT]
 > **Provocação Central:** É possível construir um time competitivo de alto nível baseado estritamente em evidências estatísticas de torneios recentes?
 
 ---
@@ -31,6 +32,7 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
   * **Categoria de Dano:** Megas focadas em Ataque Especial apresentaram desempenho estatístico superior às de Ataque Físico.
   * **Tipagem Defensiva:** Era necessário um tipo que resistisse às ameaças de Charizard Y (Fogo) e Floette (Fada). O tipo Fogo atendeu a ambos os critérios.
 
+> [!NOTE]
 > **A Solução:** A **Mega Delphox** reuniu todos os requisitos: tipagem Fogo, alto Ataque Especial e estatísticas de vitória equivalentes às opções do topo do meta, porém com uma taxa de uso significativamente menor.
 
 ---
@@ -41,7 +43,7 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 * **Definição dos Parceiros:**
   * **Sneasler:** Primeiro Pokémon com maior taxa de uso ao lado de Mega Delphox, agregando valor ofensivo e utilidade de suporte.
   * **Garchomp:** Segundo parceiro de maior sinergia e uso estatístico com a base escolhida.
-  * **Clefable (Suporte):** Na busca por suportes, notou-se que golpes de redirecionamento (*Follow Me* / *Rage Powder*) não alteravam出 drasticamente o winrate geral. Avaliando as composições fixas mais frequentes, Clefable destacou-se com o melhor rendimento.
+  * **Clefable (Suporte):** Na busca por suportes, notou-se que golpes de redirecionamento (*Follow Me* / *Rage Powder*) não alteravam drasticamente o winrate geral. Avaliando as composições fixas mais frequentes, Clefable destacou-se com o melhor rendimento.
   * **Mega Gyarados (Segunda Mega):** A análise de times que utilizavam duas Megas mostrou uma taxa de vitória superior àqueles com apenas uma. Mega Gyarados foi escolhido por entregar presença física e suporte secundário.
   * **Ninetales de Alola:** Fechando a estrutura (segundo atacante especial), apresentou excelente taxa de vitória e sinergia em números integrada ao lado de Mega Delphox.
 
