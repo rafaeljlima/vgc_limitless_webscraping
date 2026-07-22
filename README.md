@@ -11,13 +11,25 @@ Nas competições de Pokémon VGC (Video Game Championship), a montagem de times
 
 ---
 
-## Abordagem
+## Abordagem & Metodologia
 
-Desenvolvimento de uma pipeline de dados completa:
+Desenvolvimento de uma pipeline de dados de ponta a ponta:
 
 `Web Scraping / Pokémon API` ➔ `Banco Relacional` ➔ `Tratamento e Limpeza` ➔ `Análise de Performance e Winrate`
 
 O objetivo foi direcionar **100% das decisões de composição** para um torneio realizado na plataforma Limitless.
+
+### 1. Web Scraping (Extração)
+* **Mudança de Arquitetura:** Inicialmente testado com Selenium, o scraper foi migrado para **BeautifulSoup** visando maior eficiência e velocidade no processamento do grande volume de dados.
+* **Coleta Direcionada:** A extração foi mapeada para varrer todas as páginas de resultados aplicando os filtros do formato desejado, estruturando informações detalhadas de cada torneio, partida, jogador, time e Pokémon utilizado.
+* **Decisão Métrica de Modelagem (SQL):** Optou-se por **não utilizar restrições UNIQUE** nos nomes dos jogadores. Como a plataforma permite apelidos livres, essa trava causaria falsas associações entre times de pessoas diferentes que porventura usassem o mesmo Nickname.
+
+### 2. Integração via Pokémon API & Mapeamento Fuzzy
+* **Enriquecimento de Dados:** O scraping inicial não trazia atributos essenciais para análise estatística, como tipos elementares e status base dos Pokémon. Para suprir a lacuna, construiu-se um script para consumo de uma API externa.
+* **Resolução da Entidade (*TheFuzz*):** Como não havia uma chave primária nativa relacionando os nomes dos Pokémon nos torneios aos registros da API, utilizou-se a biblioteca **TheFuzz** para pareamento e correspondência aproximada de strings. Os limites de *score* de similaridade foram calibrados manualmente para garantir precisão no vínculo dos dados.
+
+### 3. Tratamento & Limpeza de Dados
+* **Saneamento da Base:** Filtrou-se a base removendo inconsistências e registros ruidosos, como torneios cadastrados incorretamente na plataforma e instâncias contendo Pokémon ou itens ilegais para o regulamento de interesse.
 
 ---
 
