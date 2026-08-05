@@ -78,6 +78,14 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 
 ---
 
+## Ferramentas & Processo de Desenvolvimento
+
+Este projeto marcou a transição para a prática de Análise de Dados e Engenharia de Prompt. Para focar os esforços nas **decisões estratégicas, modelagem de negócios e geração de insights estatísticos**, o desenvolvimento dos scripts de extração, tratamento e consultas SQL contou com o auxílio de ferramentas de Inteligência Artificial Generativa (processo conhecido como *AI-assisted coding* ou *vibe coding*). 
+
+A arquitetura das análises, a validação das regras de negócios competitivas de Pokémon e o direcionamento da pipeline foram 100% idealizados e revisados pelo autor.
+
+---
+
 ## Estrutura Técnica & Como Executar
 
 ```text
