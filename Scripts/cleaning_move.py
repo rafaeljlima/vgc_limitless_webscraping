@@ -1,13 +1,3 @@
-import os
-import sys
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-
-projeto_raiz = os.path.abspath(os.path.join(script_dir, ".."))
-
-if projeto_raiz not in sys.path:
-    sys.path.append(projeto_raiz)
-
 import re
 from difflib import SequenceMatcher
 from imports.database import Database 

@@ -1,6 +1,3 @@
-import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
-
 from thefuzz import fuzz
 from imports.database import Database
 

@@ -1,6 +1,3 @@
-import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
-
 import mysql.connector
 from mysql.connector import Error
 from contextlib import contextmanager

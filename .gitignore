@@ -2,3 +2,4 @@ config.py
 /notas
 /sql/tests.sql
 /sql/reset_scraper.sql
+**/__pycache__/
