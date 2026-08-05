@@ -3,3 +3,4 @@ config.py
 /sql/tests.sql
 /sql/reset_scraper.sql
 **/__pycache__/
+*.csv
