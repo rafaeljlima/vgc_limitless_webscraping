@@ -34,6 +34,8 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 ### 3. Tratamento & Limpeza de Dados
 * **Saneamento da Base:** Filtrou-se a base removendo inconsistências e registros ruidosos, como torneios cadastrados incorretamente na plataforma e instâncias contendo Pokémon ou itens ilegais para o regulamento de interesse.
 
+* **Padronização na Identificação de Megas:** A busca inicial por sub-strings (`LIKE '%ite'`) para mapear Mega Evoluções foi substituída por um módulo de constantes (`imports/constants.py`) contendo a lista de *Mega Stones*. Essa refatoração eliminou o risco de falsos positivos na base (como o item *Eviolite*) e preparou a pipeline para suportar novos metagames.
+
 ---
 
 ## Insights & Soluções

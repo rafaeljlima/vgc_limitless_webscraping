@@ -1,0 +1,21 @@
+MEGA_STONES = [
+    "Abomasite", "Absolite", "Aerodactylite", "Aggronite", "Alakazite", 
+    "Altarianite", "Ampharosite", "Audinite", "Banettite", "Beedrillite", 
+    "Blastoisinite", "Blazikenite", "Cameruptite", "Charizardite X", "Charizardite Y", 
+    "Diancite", "Galladite", "Garchompite", "Gardevoirite", "Gengarite", 
+    "Glalitite", "Gyaradosite", "Heracronite", "Houndoominite", "Kangaskhanite", 
+    "Latiasite", "Latiosite", "Lopunnite", "Lucarionite", "Manectite", 
+    "Mawilite", "Medichamite", "Metagrossite", "Mewtwonite X", "Mewtwonite Y", 
+    "Pidgeotite", "Pinsirite", "Sablenite", "Salamencite", "Sceptilite", 
+    "Scizorite", "Sharpedonite", "Slowbronite", "Steelixite", "Swampertite", 
+    "Tyranitarite", "Venusaurite","Absolite Z", "Barbaracite", "Baxcalibrite",
+    "Chandelurite", "Chesnaughtite", "Chimechite", "Clefablite", "Crabominite",
+    "Darkranite", "Delphoxite", "Dragoninite", "Dragalgite", "Drampanite", 
+    "Eelektrossite", "Emboarite", "Excadrite", "Falinksite", "Feraligite",
+    "Floettite", "Froslassite", "Garchompite Z", "Glimmoranite", "Golisopite",
+    "Golurkite", "Greninjite", "Hawluchanite", "Heatranite", "Lucarionite Z", 
+    "Magearnite", "Malamarite", "Meganiumite", "Meowsticite", "Pyroarite",
+    "Raichunite X", "Raichunite Y", "Scraftinite", "Scolipite", "Scovillainite",
+    "Skarmorite", "Staraptite", "Starminite", "Tatsugirinite", "Victreebelite",
+    "Zeraorite", "Zygardite"
+]
