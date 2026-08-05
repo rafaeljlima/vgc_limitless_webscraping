@@ -55,7 +55,7 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 * **Definição dos Parceiros:**
   * **Sneasler:** Primeiro Pokémon com maior taxa de uso ao lado de Mega Delphox, agregando valor ofensivo e utilidade de suporte.
   * **Garchomp:** Segundo parceiro de maior sinergia e uso estatístico com a base escolhida.
-  * **Clefable (Suporte):** Na busca por suportes, notou-se que golpes de redirecionamento (*Follow Me* / *Rage Powder*) não alteravam drasticamente o winrate geral. Avaliando as composições fixas mais frequentes, Clefable destacou-se com o melhor rendimento.
+  * **Clefable (Suporte):** Na busca por suportes, notou-se que golpes de redirecionamento (*Follow Me* / *Rage Powder*) não alteravam drasticamente o winrate geral, mesmo assim pokémons com esse tipo de golpe apareciam em virtualmente todos os times de grande relevância estatística. Avaliando as composições fixas mais frequentes, Clefable destacou-se com o melhor rendimento.
   * **Mega Gyarados (Segunda Mega):** A análise de times que utilizavam duas Megas mostrou uma taxa de vitória superior àqueles com apenas uma. Mega Gyarados foi escolhido por entregar presença física e suporte secundário.
   * **Ninetales de Alola:** Fechando a estrutura (segundo atacante especial), apresentou excelente taxa de vitória e sinergia em números integrada ao lado de Mega Delphox.
 
@@ -64,7 +64,7 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 ### 3. Seleção de Moveset e Itens
 
 * **Mega Delphox:** *Heat Wave*, *Psychic* e *Protect* figuraram em quase 100% das amostras de sucesso. Para a quarta vaga, a análise comparativa provou que o movimento **Encore** gerava um impacto em winrate significativamente superior a *Nasty Plot* e *Calm Mind*.
-* **Demais Integrantes:** A regra geral seguiu a escolha estrita dos itens e golpes de maior uso. A única exceção pontual foi o **Garchomp**, que apresentava dados de itens muito dispersos; para o desempate, optou-se pelo item *Life Orb*, introduzido no regulamento M-B seguinte e historicamente consolidado para o Pokémon.
+* **Demais Integrantes:** A regra geral seguiu a escolha estrita dos itens e golpes de maior uso. A única exceção pontual foi o **Garchomp**, que apresentava dados de itens muito dispersos; para o desempate, optou-se pelo item *Life Orb*, introduzido no regulamento M-B seguinte e historicamente consolidado para o Pokémon, configurando a unica inclusão fora de analise estatística da pesquisa.
 
 ---
 
@@ -74,7 +74,7 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 * **Fator Piloto:** O winrate reflete a habilidade média dos jogadores da amostra. A inexperiência do autor em cenários competitivos reais atua como uma variável externa não isolada pelo modelo.
 * **Ausência de Dados de Seleção (Team Preview):** O scraper coleta a composição de 6 Pokémon e o resultado da partida, mas não registra quais 4 Pokémon foram efetivamente escolhidos para entrar em campo.
 * **Ausência de Matriz de Confrontos (Matchups):** Não foram estruturados dados de desempenho de um time específico enfrentando outro time específico, apenas o rendimento isolado dos componentes.
-* **Restrição de Acesso a Recursos:** Estatisticamente, Mega Floette e Basculegion seriam os encaixes ideais para fechar a equipe, mas a indisponibilidade desses Pokémon no jogo limitou sua escolha.
+* **Restrição de Acesso a Recursos:** Estatisticamente, Mega Floette e Basculegion seriam os encaixes ideais para fechar a equipe no lugar de Mega Gyarados e Ninetales de Alola, mas a indisponibilidade desses Pokémon no jogo limitou sua escolha.
 
 ---
 
