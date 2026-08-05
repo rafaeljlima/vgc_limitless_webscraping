@@ -9,6 +9,9 @@ Nas competições de Pokémon VGC (Video Game Championship), a montagem de times
 > [!IMPORTANT]
 > **Provocação Central:** É possível construir um time competitivo de alto nível baseado estritamente em evidências estatísticas de torneios recentes?
 
+> [!NOTE]
+> **Nota do Autor:** Este é o meu primeiro projeto de análise de dados de ponta a ponta. O desenvolvimento do código de extração, limpeza e consultas SQL utilizou assistência de ferramentas de IA (*AI-assisted coding* ou *vibe coding*), permitindo concentrar o foco principal na formulação das hipóteses, análise estatística e tomada de decisão estratégica para o metagame.
+
 ---
 
 ## Abordagem & Metodologia
@@ -75,14 +78,6 @@ O objetivo foi direcionar **100% das decisões de composição** para um torneio
 * **Ausência de Dados de Seleção (Team Preview):** O scraper coleta a composição de 6 Pokémon e o resultado da partida, mas não registra quais 4 Pokémon foram efetivamente escolhidos para entrar em campo.
 * **Ausência de Matriz de Confrontos (Matchups):** Não foram estruturados dados de desempenho de um time específico enfrentando outro time específico, apenas o rendimento isolado dos componentes.
 * **Restrição de Acesso a Recursos:** Estatisticamente, Mega Floette e Basculegion seriam os encaixes ideais para fechar a equipe no lugar de Mega Gyarados e Ninetales de Alola, mas a indisponibilidade desses Pokémon no jogo limitou sua escolha.
-
----
-
-## Ferramentas & Processo de Desenvolvimento
-
-Este projeto marcou a transição para a prática de Análise de Dados e Engenharia de Prompt. Para focar os esforços nas **decisões estratégicas, modelagem de negócios e geração de insights estatísticos**, o desenvolvimento dos scripts de extração, tratamento e consultas SQL contou com o auxílio de ferramentas de Inteligência Artificial Generativa (processo conhecido como *AI-assisted coding* ou *vibe coding*). 
-
-A arquitetura das análises, a validação das regras de negócios competitivas de Pokémon e o direcionamento da pipeline foram 100% idealizados e revisados pelo autor.
 
 ---
 
