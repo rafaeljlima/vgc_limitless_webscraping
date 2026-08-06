@@ -1,109 +1,118 @@
+<div align="center">
+  <!-- Language Switcher -->
+  <a href="./README.pt-BR.md">
+    <img src="https://img.shields.io/badge/🇧🇷_Português-333333?style=for-the-badge&logoColor=white" alt="Versão em Português">
+  </a>
+  <a href="./README.md">
+    <img src="https://img.shields.io/badge/🇺🇸_English-007ACC?style=for-the-badge&logoColor=white" alt="English Version">
+  </a>
+</div>
+
 # vgc_limitless_webscraping
 
 ---
 
-## Problema & Objetivo
+## Problem & Goal
 
-Nas competições de Pokémon VGC (Video Game Championship), a montagem de times costuma ser guiada por intuição, experiência pessoal ou pela simples cópia de composições populares. 
+In Pokémon VGC (Video Game Championship) competitions, team building is often guided by intuition, personal experience, or simply copying popular compositions.
 
 > [!IMPORTANT]
-> **Provocação Central:** É possível construir um time competitivo de alto nível baseado estritamente em evidências estatísticas de torneios recentes?
+> **Core Question:** Is it possible to build a top-tier competitive team strictly based on statistical evidence from recent tournaments?
 
 > [!NOTE]
-> **Nota do Autor:** Este é o meu primeiro projeto de análise de dados de ponta a ponta. O desenvolvimento do código de extração, limpeza e consultas SQL utilizou assistência de ferramentas de IA (*AI-assisted coding* ou *vibe coding*), permitindo concentrar o foco principal na formulação das hipóteses, análise estatística e tomada de decisão estratégica para o metagame.
+> **Author's Note:** This is my first end-to-end data analysis project. Code development for extraction, cleaning, and SQL queries utilized AI assistance (*AI-assisted coding* / *vibe coding*), allowing the main focus to remain on hypothesis formulation, statistical analysis, and strategic decision-making for the metagame.
 
 ---
 
-## Abordagem & Metodologia
+## Approach & Methodology
 
-Desenvolvimento de uma pipeline de dados de ponta a ponta:
+Development of an end-to-end data pipeline:
 
-`Web Scraping / Pokémon API` ➔ `Banco Relacional` ➔ `Tratamento e Limpeza` ➔ `Análise de Performance e Winrate`
+`Web Scraping / Pokémon API` ➔ `Relational Database` ➔ `Data Cleaning & Preprocessing` ➔ `Performance & Winrate Analysis`
 
-O objetivo foi direcionar **100% das decisões de composição** para um torneio realizado na plataforma Limitless.
+The objective was to drive **100% of team composition decisions** for a tournament hosted on the Limitless platform.
 
-### 1. Web Scraping (Extração)
-* **Mudança de Arquitetura:** Inicialmente testado com Selenium, o scraper foi migrado para **BeautifulSoup** visando maior eficiência e velocidade no processamento do grande volume de dados.
-* **Coleta Direcionada:** A extração foi mapeada para varrer todas as páginas de resultados aplicando os filtros do formato desejado, estruturando informações detalhadas de cada torneio, partida, jogador, time e Pokémon utilizado.
-* **Decisão Métrica de Modelagem (SQL):** Optou-se por **não utilizar restrições UNIQUE** nos nomes dos jogadores. Como acredita-se que a plataforma permite pseudônimos livres para cada jogador, essa trava causaria falsas associações entre times de pessoas diferentes que porventura usassem o mesmo Nickname.
+### 1. Web Scraping (Extraction)
+* **Architecture Shift:** Initially tested with Selenium, the scraper was migrated to **BeautifulSoup** for higher efficiency and speed when processing large volumes of data.
+* **Targeted Collection:** Extraction was mapped to crawl all result pages applying specific format filters, structuring detailed information for each tournament, match, player, team, and Pokémon used.
+* **Data Modeling Decision (SQL):** Enforced **no UNIQUE constraints** on player names. Since the platform allows free pseudonyms, this constraint would cause false associations between teams from different players who happened to share the same nickname.
 
-### 2. Integração via Pokémon API & Mapeamento Fuzzy
-* **Enriquecimento de Dados:** O scraping inicial não trazia atributos essenciais para análise estatística, como tipos elementares e status base dos Pokémon. Para suprir a lacuna, construiu-se um script para consumo de uma API externa.
-* **Resolução da Entidade (*TheFuzz*):** Como não havia uma chave primária nativa relacionando os nomes dos Pokémon nos torneios aos registros da API, utilizou-se a biblioteca **TheFuzz** para pareamento e correspondência aproximada de strings. Os limites de *score* de similaridade foram calibrados manualmente para garantir precisão no vínculo dos dados.
+### 2. Pokémon API Integration & Fuzzy Matching
+* **Data Enrichment:** The initial scraping lacked essential statistical attributes such as elemental types and base stats. To bridge this gap, a dedicated script was built to consume an external API.
+* **Entity Resolution (*TheFuzz*):** Without a native primary key linking tournament Pokémon names to API records, the **TheFuzz** library was used for fuzzy string matching. Similarity score thresholds were manually calibrated to ensure accurate data linking.
 
-### 3. Tratamento & Limpeza de Dados
-* **Saneamento da Base:** Filtrou-se a base removendo inconsistências e registros ruidosos, como torneios cadastrados incorretamente na plataforma e instâncias contendo Pokémon ou itens ilegais para o regulamento de interesse.
-
-* **Padronização na Identificação de Megas:** A busca inicial por sub-strings (`LIKE '%ite'`) para mapear Mega Evoluções foi substituída por um módulo de constantes (`imports/constants.py`) contendo a lista de *Mega Stones*. Essa refatoração eliminou o risco de falsos positivos na base (como o item *Eviolite*) e preparou a pipeline para suportar novos metagames.
+### 3. Data Cleaning & Preprocessing
+* **Dataset Sanitation:** Noise and inconsistencies were filtered out, such as incorrectly registered tournaments and instances containing illegal Pokémon or items according to the targeted rule set.
+* **Standardizing Mega Evolution Identification:** Replaced sub-string searches (`LIKE '%ite'`) with a constant module (`imports/constants.py`) containing an explicit list of *Mega Stones*. This refactoring eliminated false positives (such as the item *Eviolite*) and scaled the pipeline to support future metagames.
 
 ---
 
-## Insights & Soluções
+## Insights & Solutions
 
-### 1. Escolha da Mega Evolução (Fundação)
+### 1. Selecting the Mega Evolution (Foundation)
 
-* **Ponto de Partida:** No regulamento analisado (Regulation M-A), todas as equipes de alto desempenho utilizam ao menos uma Mega Evolução.
-* **A Armadilha do Meta:** **Mega Charizard Y** e **Mega Floette** lideram isoladamente em taxa de uso e vitórias. No entanto, por integrarem o topo do metagame, a maioria dos oponentes já constrói estratégias específicas para anulá-los. Para fugir desse viés, buscou-se uma alternativa de alto rendimento, mas com menor previsão de combate.
-* **Filtros de Desempenho:**
-  * **Velocidade Base:** A análise indicou que ultrapassar 60 de Speed base é suficiente para estabilizar a taxa de vitória em patamares elevados, mostrando que buscar o Pokémon mais rápido não era um fator determinante.
-  * **Categoria de Dano:** Megas focadas em Ataque Especial apresentaram desempenho estatístico superior às de Ataque Físico.
-  * **Tipagem Defensiva:** Era necessário um tipo que resistisse às ameaças de Charizard Y (Fogo) e Floette (Fada). O tipo Fogo atendeu a ambos os critérios.
+* **Starting Point:** Under the analyzed regulation (Regulation M-A), all top-performing teams run at least one Mega Evolution.
+* **The Meta Trap:** **Mega Charizard Y** and **Mega Floette** heavily dominate usage and win rates. However, because they sit at the top of the meta, most opponents build specific counter-strategies against them. To avoid this bias, the goal was to identify a high-performing alternative with lower predictability.
+* **Performance Filters:**
+  * **Base Speed:** Analysis revealed that exceeding 60 Base Speed is sufficient to stabilize high win rates, proving that chasing the fastest Pokémon was not a decisive factor.
+  * **Damage Category:** Special Attack-focused Megas statistically outperformed Physical Attackers.
+  * **Defensive Typing:** Needed a typing that resisted key threats from Charizard Y (Fire) and Floette (Fairy). Fire-typing met both criteria.
 
 > [!NOTE]
-> **A Solução:** A **Mega Delphox** reuniu todos os requisitos: tipagem Fogo, alto Ataque Especial e estatísticas de vitória equivalentes às opções do topo do meta, porém com uma taxa de uso significativamente menor.
+> **The Solution:** **Mega Delphox** satisfied all requirements: Fire-typing, high Special Attack, and win rates equivalent to top-meta choices, but with a significantly lower usage rate.
 
 ---
 
-### 2. Composição do Restante do Time
+### 2. Rest of the Team Composition
 
-* **Arquitetura da Equipe:** A estrutura estatística de maior sucesso no formato é composta por **3 atacantes físicos, 2 atacantes especiais e 1 suporte**.
-* **Definição dos Parceiros:**
-  * **Sneasler:** Primeiro Pokémon com maior taxa de uso ao lado de Mega Delphox, agregando valor ofensivo e utilidade de suporte.
-  * **Garchomp:** Segundo parceiro de maior sinergia e uso estatístico com a base escolhida.
-  * **Clefable (Suporte):** Na busca por suportes, notou-se que golpes de redirecionamento (*Follow Me* / *Rage Powder*) não alteravam drasticamente o winrate geral, mesmo assim pokémons com esse tipo de golpe apareciam em virtualmente todos os times de grande relevância estatística. Avaliando as composições fixas mais frequentes, Clefable destacou-se com o melhor rendimento.
-  * **Mega Gyarados (Segunda Mega):** A análise de times que utilizavam duas Megas mostrou uma taxa de vitória superior àqueles com apenas uma. Mega Gyarados foi escolhido por entregar presença física e suporte secundário.
-  * **Ninetales de Alola:** Fechando a estrutura (segundo atacante especial), apresentou excelente taxa de vitória e sinergia em números integrada ao lado de Mega Delphox.
-
----
-
-### 3. Seleção de Moveset e Itens
-
-* **Mega Delphox:** *Heat Wave*, *Psychic* e *Protect* figuraram em quase 100% das amostras de sucesso. Para a quarta vaga, a análise comparativa provou que o movimento **Encore** gerava um impacto em winrate significativamente superior a *Nasty Plot* e *Calm Mind*.
-* **Demais Integrantes:** A regra geral seguiu a escolha estrita dos itens e golpes de maior uso. A única exceção pontual foi o **Garchomp**, que apresentava dados de itens muito dispersos; para o desempate, optou-se pelo item *Life Orb*, introduzido no regulamento M-B seguinte e historicamente consolidado para o Pokémon, configurando a unica inclusão fora de analise estatística da pesquisa.
+* **Team Architecture:** The most statistically successful team archetype in this format consists of **3 physical attackers, 2 special attackers, and 1 support**.
+* **Partner Selection:**
+  * **Sneasler:** Top partner by usage rate alongside Mega Delphox, providing high offensive pressure and support utility.
+  * **Garchomp:** Second-highest synergy and usage partner with the core choice.
+  * **Clefable (Support):** Redirection moves (*Follow Me* / *Rage Powder*) did not drastically alter overall win rate, yet Pokémon with these moves appeared in virtually all top teams. Comparing frequent compositions, Clefable delivered the best performance.
+  * **Mega Gyarados (Second Mega):** Teams running two Megas showed a higher overall win rate than single-Mega teams. Mega Gyarados was selected for physical presence and secondary support.
+  * **Alolan Ninetales:** Filling the final spot (second special attacker), it demonstrated strong win rates and numeric synergy alongside Mega Delphox.
 
 ---
 
-## Limitações da Análise
+### 3. Moveset & Item Selection
 
-* **Mudança de Regulamento (Viés de Amostra):** Os dados coletados referem-se à Regulation M-A. O torneio disputado utilizará a Regulation M-B, que introduz novos Pokémon e itens não contemplados na base histórica.
-* **Fator Piloto:** O winrate reflete a habilidade média dos jogadores da amostra. A inexperiência do autor em cenários competitivos reais atua como uma variável externa não isolada pelo modelo.
-* **Ausência de Dados de Seleção (Team Preview):** O scraper coleta a composição de 6 Pokémon e o resultado da partida, mas não registra quais 4 Pokémon foram efetivamente escolhidos para entrar em campo.
-* **Ausência de Matriz de Confrontos (Matchups):** Não foram estruturados dados de desempenho de um time específico enfrentando outro time específico, apenas o rendimento isolado dos componentes.
-* **Restrição de Acesso a Recursos:** Estatisticamente, Mega Floette e Basculegion seriam os encaixes ideais para fechar a equipe no lugar de Mega Gyarados e Ninetales de Alola, mas a indisponibilidade desses Pokémon no jogo limitou sua escolha.
+* **Mega Delphox:** *Heat Wave*, *Psychic*, and *Protect* appeared in nearly 100% of successful samples. For the fourth slot, comparative analysis proved that **Encore** generated a significantly higher positive impact on win rate than *Nasty Plot* or *Calm Mind*.
+* **Remaining Teammates:** Followed strict top-usage choices for items and movesets. The only exception was **Garchomp**, whose item data was overly fragmented; as a tie-breaker, *Life Orb* was selected (introduced in the subsequent Regulation M-B and historically established for Garchomp), marking the sole non-statistical choice in the research.
 
 ---
 
-## Estrutura Técnica & Como Executar
+## Analysis Limitations
+
+* **Rule Set Change (Sample Bias):** Collected data reflects Regulation M-A. The upcoming tournament will use Regulation M-B, introducing new Pokémon and items not present in the historical dataset.
+* **Player Skill Factor:** Win rates reflect average player skill within the sample. The author's relative inexperience in live competitive play acts as an unisolated variable.
+* **Missing Team Preview Data:** The scraper collects full 6-Pokémon team compositions and match outcomes, but cannot capture which 4 Pokémon were actually brought into battle.
+* **Lack of Matchup Matrix:** Matchup-specific performance data (Team A vs. Team B) was not structured, only isolated component performance.
+* **Resource Access Constraints:** Statistically, Mega Floette and Basculegion would be ideal fits over Mega Gyarados and Alolan Ninetales, but their unavailability in-game forced alternative choices.
+
+---
+
+## Technical Structure & Setup
 
 ```text
-├── scripts/    # Execução do scraper, rotinas de limpeza e Jupyter Notebook das análises.
-├── sql/        # Scripts DDL para criação do banco de dados relacional e exportações CSV.
-└── imports/    # Módulos auxiliares de conexão e utilitários.
+├── scripts/    # Scraper execution, cleaning routines, and analysis Jupyter Notebooks.
+├── sql/        # DDL scripts for relational database creation and CSV exports.
+└── imports/    # Auxiliary connection modules and utilities.
 ```
 
-### Instalação Local
+### Local Installation
 
-1. Instale as dependências listadas no projeto:
+1. Install required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Crie o arquivo `config.py` dentro do diretório `imports/` com as credenciais do seu banco de dados:
+2. Create a config.py file inside the imports/ directory with your database credentials:
 ```python
 DB_CONFIG = {
-    "host": "seu_host",
-    "database": "seu_banco",
-    "user": "seu_usuario",
-    "password": "sua_senha"
+    "host": "your_host",
+    "database": "your_database",
+    "user": "your_user",
+    "password": "your_password"
 }
 ```
