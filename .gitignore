@@ -4,3 +4,5 @@ config.py
 /sql/reset_scraper.sql
 **/__pycache__/
 *.csv
+*.png
+.env
