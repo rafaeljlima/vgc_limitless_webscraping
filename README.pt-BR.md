@@ -1,12 +1,6 @@
-```html
 <div align="center">
-  <!-- Seletor de Idioma -->
-  <a href="./README.pt-BR.md">
-    <img src="https://img.shields.io/badge/🇧🇷_Português-007ACC?style=for-the-badge&logoColor=white" alt="Versão em Português">
-  </a>
-  <a href="./README.md">
-    <img src="https://img.shields.io/badge/🇺🇸_English-333333?style=for-the-badge&logoColor=white" alt="English Version">
-  </a>
+<a href="./README.pt-BR.md"><img src="https://img.shields.io/badge/🇧🇷_Português-007ACC?style=for-the-badge&logoColor=white" alt="Versão em Português"></a>
+<a href="./README.md"><img src="https://img.shields.io/badge/🇺🇸_English-333333?style=for-the-badge&logoColor=white" alt="English Version"></a>
 </div>
 
 # vgc_limitless_webscraping
