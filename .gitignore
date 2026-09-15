@@ -6,3 +6,4 @@ config.py
 *.csv
 *.png
 .env
+/bi
